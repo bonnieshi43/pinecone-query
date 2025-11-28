@@ -29,11 +29,13 @@
     cursor: pointer;
     transition: all 0.2s;
     position: relative;
+    z-index: 1;
 
     &:hover {
       border-color: #4a90e2;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       transform: translateY(-2px);
+      z-index: 10;
     }
 
     .chunk-header {
@@ -96,6 +98,46 @@
       &:hover {
         background-color: #357abd;
       }
+    }
+
+    .chunk-tooltip {
+      position: absolute;
+      left: 15px;
+      right: 15px;
+      top: 100%;
+      margin-top: 4px;
+      background: rgba(33, 37, 41, 0.95);
+      color: #f8f9fa;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 12px;
+      line-height: 1.5;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(4px);
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      pointer-events: auto;
+      z-index: 5;
+
+      .chunk-tooltip-title {
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #a5d8ff;
+      }
+
+      .chunk-tooltip-content {
+        max-height: 180px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+      }
+    }
+
+    &:hover .chunk-tooltip,
+    .chunk-tooltip:hover {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
     }
   }
 }

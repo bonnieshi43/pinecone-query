@@ -31,40 +31,51 @@ export const ChunkList: React.FC<ChunkListProps> = ({ chunks, onSelectChunk, loa
         <h3>Search Results ({chunks.length})</h3>
       </div>
       <div className="chunk-items">
-        {chunks.map((chunk) => (
-          <div key={chunk.id} className="chunk-item" onClick={() => onSelectChunk(chunk)}>
-            <div className="chunk-header">
-              <span className="chunk-id">ID: {chunk.id}</span>
-              {chunk.score !== undefined && (
-                <span className="chunk-score">Score: {chunk.score.toFixed(4)}</span>
-              )}
+        {chunks.map((chunk) => {
+          const contextText = chunk.metadata.summary || chunk.pageContent;
+          return (
+            <div
+              key={chunk.id}
+              className="chunk-item"
+              onClick={() => onSelectChunk(chunk)}
+            >
+              <div className="chunk-header">
+                {chunk.score !== undefined && (
+                  <span className="chunk-score">Score: {chunk.score.toFixed(4)}</span>
+                )}
+                <span className="chunk-id">ID: {chunk.id}</span>
+              </div>
+              <div className="chunk-metadata">
+                {chunk.metadata.module && (
+                  <span className="metadata-tag">Module: {chunk.metadata.module}</span>
+                )}
+                {chunk.metadata.name && (
+                  <span className="metadata-tag">Name: {chunk.metadata.name}</span>
+                )}
+                {chunk.metadata.path && (
+                  <span className="metadata-tag">Path: {chunk.metadata.path}</span>
+                )}
+                {chunk.metadata.keywords && chunk.metadata.keywords.length > 0 && (
+                  <span className="metadata-tag">Keywords: {chunk.metadata.keywords.join(", ")}</span>
+                )}
+                {chunk.metadata.extra && Object.keys(chunk.metadata.extra).length > 0 && (
+                  <span className="metadata-tag">
+                    Extra: {Object.entries(chunk.metadata.extra).map(([k, v]) => `${k}=${v}`).join(", ")}
+                  </span>
+                )}
+              </div>
+              <div className="chunk-content-preview">
+                {chunk.pageContent.substring(0, 200)}
+                {chunk.pageContent.length > 200 && "..."}
+              </div>
+              <button className="edit-button">Edit</button>
+              <div className="chunk-tooltip">
+                <div className="chunk-tooltip-title">Context</div>
+                <div className="chunk-tooltip-content">{contextText}</div>
+              </div>
             </div>
-            <div className="chunk-metadata">
-              {chunk.metadata.module && (
-                <span className="metadata-tag">Module: {chunk.metadata.module}</span>
-              )}
-              {chunk.metadata.name && (
-                <span className="metadata-tag">Name: {chunk.metadata.name}</span>
-              )}
-              {chunk.metadata.path && (
-                <span className="metadata-tag">Path: {chunk.metadata.path}</span>
-              )}
-              {chunk.metadata.keywords && chunk.metadata.keywords.length > 0 && (
-                <span className="metadata-tag">Keywords: {chunk.metadata.keywords.join(", ")}</span>
-              )}
-              {chunk.metadata.extra && Object.keys(chunk.metadata.extra).length > 0 && (
-                <span className="metadata-tag">
-                  Extra: {Object.entries(chunk.metadata.extra).map(([k, v]) => `${k}=${v}`).join(", ")}
-                </span>
-              )}
-            </div>
-            <div className="chunk-content-preview">
-              {chunk.pageContent.substring(0, 200)}
-              {chunk.pageContent.length > 200 && "..."}
-            </div>
-            <button className="edit-button">Edit</button>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

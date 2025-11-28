@@ -84,12 +84,12 @@ export const QueryForm: React.FC<QueryFormProps> = ({ onQuery, loading }) => {
       <div className="form-row">
         <div className="form-group full-width">
           <label htmlFor="queryText">Query Text (Semantic Search):</label>
-          <input
+          <textarea
             id="queryText"
-            type="text"
             value={queryText}
             onChange={(e) => setQueryText(e.target.value)}
             placeholder="Enter text for semantic search"
+            rows={4}
           />
         </div>
       </div>

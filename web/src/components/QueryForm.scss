@@ -25,7 +25,8 @@
         color: #333;
       }
 
-      input {
+      input,
+      textarea {
         width: 100%;
         padding: 8px 12px;
         border: 1px solid #ddd;
@@ -38,6 +39,11 @@
           border-color: #4a90e2;
           box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
         }
+      }
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
       }
     }
   }
