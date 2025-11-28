@@ -43,6 +43,9 @@ export function getPineconeIndex() {
  * 构建 Pinecone metadata 过滤器
  */
 function buildMetadataFilter(request: QueryChunksRequest): any {
+  if (!request.metadataFilter) {
+    return undefined;
+  }
   const filter: any = {};
 
   if (request.module) {

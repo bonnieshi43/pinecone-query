@@ -13,6 +13,7 @@ export const QueryForm: React.FC<QueryFormProps> = ({ onQuery, loading }) => {
   const [path, setPath] = useState("");
   const [queryText, setQueryText] = useState("");
   const [topK, setTopK] = useState(20);
+  const [useMetadataFilter, setUseMetadataFilter] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +29,7 @@ export const QueryForm: React.FC<QueryFormProps> = ({ onQuery, loading }) => {
       name: name || undefined,
       path: path || undefined,
       queryText: queryText || undefined,
+      metadataFilter: useMetadataFilter,
       topK: topK || 20,
       page: 1,
       pageSize: 20,
@@ -42,6 +44,7 @@ export const QueryForm: React.FC<QueryFormProps> = ({ onQuery, loading }) => {
     setPath("");
     setQueryText("");
     setTopK(20);
+    setUseMetadataFilter(false);
   };
 
   return (
@@ -92,6 +95,17 @@ export const QueryForm: React.FC<QueryFormProps> = ({ onQuery, loading }) => {
             rows={4}
           />
         </div>
+      </div>
+
+      <div className="form-row metadata-filter-row">
+        <button
+          type="button"
+          className={`metadata-filter-toggle ${useMetadataFilter ? "active" : ""}`}
+          onClick={() => setUseMetadataFilter((prev) => !prev)}
+        >
+          {useMetadataFilter ? "Metadata Filter: ON" : "Metadata Filter: OFF"}
+        </button>
+        <span className="metadata-filter-hint">开启后按 Module/Name/Path 精确过滤 metadata</span>
       </div>
 
       <div className="form-row">

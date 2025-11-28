@@ -3,6 +3,7 @@ export interface ChunkMetadata {
   chunkIndex?: number;
   module?: string;
   name?: string;
+  type?: string;
   summary?: string;
   tags?: string[];
   keywords?: string[];
@@ -23,6 +24,7 @@ export interface QueryChunksRequest {
   name?: string;
   path?: string;
   queryText?: string;
+  metadataFilter?: boolean;
   topK?: number;
   page?: number;
   pageSize?: number;

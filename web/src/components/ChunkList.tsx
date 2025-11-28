@@ -46,6 +46,9 @@ export const ChunkList: React.FC<ChunkListProps> = ({ chunks, onSelectChunk, loa
                 <span className="chunk-id">ID: {chunk.id}</span>
               </div>
               <div className="chunk-metadata">
+                {chunk.metadata.type && (
+                  <span className="metadata-tag">Type: {chunk.metadata.type}</span>
+                )}
                 {chunk.metadata.module && (
                   <span className="metadata-tag">Module: {chunk.metadata.module}</span>
                 )}
