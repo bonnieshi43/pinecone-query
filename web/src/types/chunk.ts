@@ -20,6 +20,7 @@ export interface Chunk {
 }
 
 export interface QueryChunksRequest {
+  id?: string;
   module?: string;
   name?: string;
   path?: string;

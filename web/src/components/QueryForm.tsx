@@ -8,6 +8,7 @@ interface QueryFormProps {
 }
 
 export const QueryForm: React.FC<QueryFormProps> = ({ onQuery, loading }) => {
+  const [id, setId] = useState("");
   const [module, setModule] = useState("");
   const [name, setName] = useState("");
   const [path, setPath] = useState("");
@@ -19,12 +20,13 @@ export const QueryForm: React.FC<QueryFormProps> = ({ onQuery, loading }) => {
     e.preventDefault();
 
     // 验证至少有一个查询条件
-    if (!module && !name && !path && !queryText) {
+    if (!id && !module && !name && !path && !queryText) {
       alert("Please provide at least one query parameter");
       return;
     }
 
     const request: QueryChunksRequest = {
+      id: id || undefined,
       module: module || undefined,
       name: name || undefined,
       path: path || undefined,
@@ -39,6 +41,7 @@ export const QueryForm: React.FC<QueryFormProps> = ({ onQuery, loading }) => {
   };
 
   const handleReset = () => {
+    setId("");
     setModule("");
     setName("");
     setPath("");
@@ -50,6 +53,17 @@ export const QueryForm: React.FC<QueryFormProps> = ({ onQuery, loading }) => {
   return (
     <form className="query-form" onSubmit={handleSubmit}>
       <div className="form-row">
+        <div className="form-group">
+          <label htmlFor="id">Chunk ID:</label>
+          <input
+            id="id"
+            type="text"
+            value={id}
+            onChange={(e) => setId(e.target.value)}
+            placeholder="Search by chunk ID"
+          />
+        </div>
+
         <div className="form-group">
           <label htmlFor="module">Module:</label>
           <input

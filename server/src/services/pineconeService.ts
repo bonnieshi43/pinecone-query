@@ -117,6 +117,16 @@ export async function queryChunks(request: QueryChunksRequest): Promise<Chunk[]>
 
   let chunks: Chunk[] = [];
 
+  // 如果提供了 id，优先使用 id 查询
+  if (request.id) {
+    const chunk = await getChunkById(request.id);
+    if (chunk) {
+      return [chunk];
+    }
+    // 如果 id 不存在，返回空数组
+    return [];
+  }
+
   if (request.queryText) {
     // 使用向量相似度查询
     const queryEmbedding = await generateEmbedding(request.queryText);

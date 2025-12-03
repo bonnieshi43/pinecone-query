@@ -19,11 +19,11 @@ router.post("/query", async (req: Request<{}, QueryChunksResponse, QueryChunksRe
     const request: QueryChunksRequest = req.body;
 
     // 验证至少有一个查询条件
-    if (!request.module && !request.name && !request.path && !request.queryText) {
+    if (!request.id && !request.module && !request.name && !request.path && !request.queryText) {
       return res.status(400).json({
         success: false,
         chunks: [],
-        error: "At least one query parameter (module, name, path, or queryText) is required",
+        error: "At least one query parameter (id, module, name, path, or queryText) is required",
       });
     }
 
