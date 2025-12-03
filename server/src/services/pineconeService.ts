@@ -40,6 +40,46 @@ export function getPineconeIndex() {
 }
 
 /**
+ * 规范化文件名，移除 .md 后缀以便匹配
+ * 例如: "QuerySquare.md" -> "QuerySquare", "QuerySquare" -> "QuerySquare"
+ */
+function normalizeName(name: string): string {
+  if (!name) return "";
+  const normalized = name.trim();
+  // 移除 .md 后缀（不区分大小写）
+  if (normalized.toLowerCase().endsWith(".md")) {
+    return normalized.slice(0, -3);
+  }
+  return normalized;
+}
+
+/**
+ * 规范化路径，统一路径分隔符以便匹配
+ * 将反斜杠转换为正斜杠，统一路径格式
+ * 例如: "modules\\dataworksheet" -> "modules/dataworksheet"
+ */
+function normalizePath(path: string): string {
+  if (!path) return "";
+  // 将反斜杠统一转换为正斜杠
+  return path.replace(/\\/g, "/").trim();
+}
+
+/**
+ * 模糊匹配字符串，支持双向包含匹配
+ * @param source 源字符串（索引中的数据）
+ * @param query 查询字符串（用户输入）
+ * @returns 是否匹配
+ */
+function fuzzyMatch(source: string, query: string): boolean {
+  if (!source || !query) return false;
+  const normalizedSource = source.toLowerCase().trim();
+  const normalizedQuery = query.toLowerCase().trim();
+  // 双向包含匹配：源包含查询，或查询包含源
+  return normalizedSource.includes(normalizedQuery) || 
+         normalizedQuery.includes(normalizedSource);
+}
+
+/**
  * 构建 Pinecone metadata 过滤器
  */
 function buildMetadataFilter(request: QueryChunksRequest): any {
@@ -88,12 +128,40 @@ export async function queryChunks(request: QueryChunksRequest): Promise<Chunk[]>
       filter: filter,
     });
 
-    chunks = queryResponse.matches.map((match) => ({
+    chunks = queryResponse.matches.map((match: any) => ({
       id: match.id,
       pageContent: (match.metadata as any)?.pageContent || (match.metadata as any)?.text || "",
       metadata: (match.metadata as any) || {},
       score: match.score,
     }));
+
+    // 当有 queryText 时，也需要在客户端进行模糊过滤（因为 Pinecone filter 是精确匹配）
+    if (request.module) {
+      chunks = chunks.filter((chunk) => {
+        const module = chunk.metadata.module || "";
+        return fuzzyMatch(module, request.module!);
+      });
+    }
+
+    if (request.name) {
+      chunks = chunks.filter((chunk) => {
+        const chunkName = chunk.metadata.name || "";
+        const queryName = request.name || "";
+        const normalizedChunkName = normalizeName(chunkName).toLowerCase();
+        const normalizedQueryName = normalizeName(queryName).toLowerCase();
+        return fuzzyMatch(normalizedChunkName, normalizedQueryName);
+      });
+    }
+
+    if (request.path) {
+      chunks = chunks.filter((chunk) => {
+        const chunkPath = chunk.metadata.path || "";
+        const queryPath = request.path || "";
+        const normalizedChunkPath = normalizePath(chunkPath).toLowerCase();
+        const normalizedQueryPath = normalizePath(queryPath).toLowerCase();
+        return fuzzyMatch(normalizedChunkPath, normalizedQueryPath);
+      });
+    }
   } else if (filter) {
     // 只使用 metadata 过滤，Pinecone 需要至少一个向量进行查询
     // 使用一个通用的查询向量来获取所有匹配的向量，然后用 filter 过滤
@@ -107,32 +175,40 @@ export async function queryChunks(request: QueryChunksRequest): Promise<Chunk[]>
       filter: filter,
     });
 
-    chunks = queryResponse.matches.map((match) => ({
+    chunks = queryResponse.matches.map((match: any) => ({
       id: match.id,
       pageContent: (match.metadata as any)?.pageContent || (match.metadata as any)?.text || "",
       metadata: (match.metadata as any) || {},
       score: match.score,
     }));
 
-    // 客户端过滤（支持部分匹配，因为 Pinecone filter 只支持精确匹配）
+    // 客户端过滤（支持模糊匹配，因为 Pinecone filter 只支持精确匹配）
     if (request.module) {
       chunks = chunks.filter((chunk) => {
         const module = chunk.metadata.module || "";
-        return module.toLowerCase().includes(request.module!.toLowerCase());
+        return fuzzyMatch(module, request.module!);
       });
     }
 
     if (request.name) {
       chunks = chunks.filter((chunk) => {
-        const name = chunk.metadata.name || "";
-        return name.toLowerCase().includes(request.name!.toLowerCase());
+        const chunkName = chunk.metadata.name || "";
+        const queryName = request.name || "";
+        // 规范化两边的 name（移除 .md 后缀）后再比较
+        const normalizedChunkName = normalizeName(chunkName).toLowerCase();
+        const normalizedQueryName = normalizeName(queryName).toLowerCase();
+        return fuzzyMatch(normalizedChunkName, normalizedQueryName);
       });
     }
 
     if (request.path) {
       chunks = chunks.filter((chunk) => {
-        const path = chunk.metadata.path || "";
-        return path.toLowerCase().includes(request.path!.toLowerCase());
+        const chunkPath = chunk.metadata.path || "";
+        const queryPath = request.path || "";
+        // 规范化路径（统一分隔符）后再比较
+        const normalizedChunkPath = normalizePath(chunkPath).toLowerCase();
+        const normalizedQueryPath = normalizePath(queryPath).toLowerCase();
+        return fuzzyMatch(normalizedChunkPath, normalizedQueryPath);
       });
     }
   } else {

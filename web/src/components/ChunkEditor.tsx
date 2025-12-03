@@ -181,6 +181,7 @@ export const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunk, onSave, onCance
           </div>
 
           <div className="metadata-readonly">
+            <h4>Read-only Fields</h4>
             <div className="readonly-field">
               <label>Module:</label>
               <span>{metadata.module || "N/A"}</span>
@@ -194,6 +195,10 @@ export const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunk, onSave, onCance
               <span>{metadata.path || "N/A"}</span>
             </div>
             <div className="readonly-field">
+              <label>Type:</label>
+              <span>{metadata.type || "N/A"}</span>
+            </div>
+            <div className="readonly-field">
               <label>Chunk Index:</label>
               <span>{metadata.chunkIndex !== undefined ? metadata.chunkIndex : "N/A"}</span>
             </div>
@@ -203,6 +208,45 @@ export const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunk, onSave, onCance
                 <span>{new Date(metadata.lastModified).toLocaleString()}</span>
               </div>
             )}
+            {/* 显示所有其他自定义字段 */}
+            {Object.keys(metadata)
+              .filter((key) => {
+                // 排除已显示的标准字段和可编辑字段
+                const standardFields = [
+                  "module",
+                  "name",
+                  "path",
+                  "type",
+                  "chunkIndex",
+                  "lastModified",
+                  "summary",
+                  "tags",
+                  "keywords",
+                  "extra",
+                  "pageContent",
+                  "text",
+                ];
+                return !standardFields.includes(key);
+              })
+              .map((key) => {
+                const value = metadata[key];
+                let displayValue: string;
+                if (value === null || value === undefined) {
+                  displayValue = "N/A";
+                } else if (Array.isArray(value)) {
+                  displayValue = value.join(", ");
+                } else if (typeof value === "object") {
+                  displayValue = JSON.stringify(value, null, 2);
+                } else {
+                  displayValue = String(value);
+                }
+                return (
+                  <div key={key} className="readonly-field">
+                    <label>{key}:</label>
+                    <span>{displayValue}</span>
+                  </div>
+                );
+              })}
           </div>
         </div>
       </div>

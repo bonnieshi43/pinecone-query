@@ -46,6 +46,7 @@ export const ChunkList: React.FC<ChunkListProps> = ({ chunks, onSelectChunk, loa
                 <span className="chunk-id">ID: {chunk.id}</span>
               </div>
               <div className="chunk-metadata">
+                {/* 标准字段 */}
                 {chunk.metadata.type && (
                   <span className="metadata-tag">Type: {chunk.metadata.type}</span>
                 )}
@@ -58,14 +59,67 @@ export const ChunkList: React.FC<ChunkListProps> = ({ chunks, onSelectChunk, loa
                 {chunk.metadata.path && (
                   <span className="metadata-tag">Path: {chunk.metadata.path}</span>
                 )}
+                {chunk.metadata.chunkIndex !== undefined && (
+                  <span className="metadata-tag">Chunk Index: {chunk.metadata.chunkIndex}</span>
+                )}
+                {chunk.metadata.summary && (
+                  <span className="metadata-tag">Summary: {chunk.metadata.summary}</span>
+                )}
+                {chunk.metadata.tags && chunk.metadata.tags.length > 0 && (
+                  <span className="metadata-tag">Tags: {chunk.metadata.tags.join(", ")}</span>
+                )}
                 {chunk.metadata.keywords && chunk.metadata.keywords.length > 0 && (
                   <span className="metadata-tag">Keywords: {chunk.metadata.keywords.join(", ")}</span>
+                )}
+                {chunk.metadata.lastModified && (
+                  <span className="metadata-tag">
+                    Last Modified: {new Date(chunk.metadata.lastModified).toLocaleString()}
+                  </span>
                 )}
                 {chunk.metadata.extra && Object.keys(chunk.metadata.extra).length > 0 && (
                   <span className="metadata-tag">
                     Extra: {Object.entries(chunk.metadata.extra).map(([k, v]) => `${k}=${v}`).join(", ")}
                   </span>
                 )}
+                {/* 显示所有其他自定义字段 */}
+                {Object.keys(chunk.metadata)
+                  .filter((key) => {
+                    // 排除已显示的标准字段和特殊字段
+                    const standardFields = [
+                      "type",
+                      "module",
+                      "name",
+                      "path",
+                      "chunkIndex",
+                      "summary",
+                      "tags",
+                      "keywords",
+                      "lastModified",
+                      "extra",
+                      "pageContent",
+                      "text",
+                    ];
+                    return !standardFields.includes(key);
+                  })
+                  .map((key) => {
+                    const value = chunk.metadata[key];
+                    // 格式化不同类型的值
+                    let displayValue: string;
+                    if (value === null || value === undefined) {
+                      return null;
+                    } else if (Array.isArray(value)) {
+                      displayValue = value.join(", ");
+                    } else if (typeof value === "object") {
+                      displayValue = JSON.stringify(value);
+                    } else {
+                      displayValue = String(value);
+                    }
+                    return (
+                      <span key={key} className="metadata-tag">
+                        {key}: {displayValue}
+                      </span>
+                    );
+                  })}
               </div>
               <div className="chunk-content-preview">
                 {chunk.pageContent.substring(0, 200)}
