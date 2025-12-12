@@ -1,26 +1,66 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import type { QueryChunksRequest } from "../types/chunk";
 import "./QueryForm.scss";
 
 interface QueryFormProps {
   onQuery: (request: QueryChunksRequest) => void;
   loading?: boolean;
+  initialPrompt?: string;
+  onPromptChange?: (prompt: string) => void;
+  initialQueryText?: string;
+  onQueryTextChange?: (queryText: string) => void;
 }
 
-export const QueryForm: React.FC<QueryFormProps> = ({ onQuery, loading }) => {
+export const QueryForm: React.FC<QueryFormProps> = ({
+  onQuery,
+  loading,
+  initialPrompt,
+  onPromptChange,
+  initialQueryText,
+  onQueryTextChange,
+}) => {
   const [id, setId] = useState("");
   const [module, setModule] = useState("");
   const [name, setName] = useState("");
   const [path, setPath] = useState("");
-  const [queryText, setQueryText] = useState("");
+  const [queryText, setQueryText] = useState(initialQueryText || "");
+  const [prompt, setPrompt] = useState(initialPrompt || "");
   const [topK, setTopK] = useState(20);
   const [useMetadataFilter, setUseMetadataFilter] = useState(false);
+
+  // 当 initialPrompt 变化时更新 prompt
+  useEffect(() => {
+    if (initialPrompt !== undefined) {
+      setPrompt(initialPrompt);
+    }
+  }, [initialPrompt]);
+
+  // 当 initialQueryText 变化时更新 queryText
+  useEffect(() => {
+    if (initialQueryText !== undefined) {
+      setQueryText(initialQueryText);
+    }
+  }, [initialQueryText]);
+
+  const handlePromptChange = (value: string) => {
+    setPrompt(value);
+    if (onPromptChange) {
+      onPromptChange(value);
+    }
+  };
+
+  const handleQueryTextChange = (value: string) => {
+    setQueryText(value);
+    if (onQueryTextChange) {
+      onQueryTextChange(value);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     // 验证至少有一个查询条件
-    if (!id && !module && !name && !path && !queryText) {
+    if (!id && !module && !name && !path && !queryText && !prompt) {
       alert("Please provide at least one query parameter");
       return;
     }
@@ -31,6 +71,7 @@ export const QueryForm: React.FC<QueryFormProps> = ({ onQuery, loading }) => {
       name: name || undefined,
       path: path || undefined,
       queryText: queryText || undefined,
+      prompt: prompt || undefined,
       metadataFilter: useMetadataFilter,
       topK: topK || 20,
       page: 1,
@@ -46,6 +87,7 @@ export const QueryForm: React.FC<QueryFormProps> = ({ onQuery, loading }) => {
     setName("");
     setPath("");
     setQueryText("");
+    setPrompt("");
     setTopK(20);
     setUseMetadataFilter(false);
   };
@@ -104,8 +146,21 @@ export const QueryForm: React.FC<QueryFormProps> = ({ onQuery, loading }) => {
           <textarea
             id="queryText"
             value={queryText}
-            onChange={(e) => setQueryText(e.target.value)}
+            onChange={(e) => handleQueryTextChange(e.target.value)}
             placeholder="Enter text for semantic search"
+            rows={2}
+          />
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="form-group full-width">
+          <label htmlFor="prompt">Prompt (Similarity Search):</label>
+          <textarea
+            id="prompt"
+            value={prompt}
+            onChange={(e) => handlePromptChange(e.target.value)}
+            placeholder="Enter your prompt for similarity search (will be used if provided)"
             rows={4}
           />
         </div>

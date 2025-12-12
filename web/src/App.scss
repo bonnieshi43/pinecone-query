@@ -20,13 +20,13 @@ body {
   .app-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    padding: 30px 20px;
+    padding: 16px 20px;
     text-align: center;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 
     h1 {
       margin: 0 0 10px 0;
-      font-size: 32px;
+      font-size: 24px;
       font-weight: 600;
     }
 
@@ -43,6 +43,35 @@ body {
     width: 100%;
     margin: 0 auto;
     padding: 20px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e9ecef;
+
+    .tab-button {
+      padding: 12px 24px;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: #666;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: -2px;
+
+      &:hover {
+        color: #667eea;
+      }
+
+      &.active {
+        color: #667eea;
+        border-bottom-color: #667eea;
+      }
+    }
   }
 
   .error-message {

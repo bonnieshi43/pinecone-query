@@ -127,9 +127,12 @@ export async function queryChunks(request: QueryChunksRequest): Promise<Chunk[]>
     return [];
   }
 
-  if (request.queryText) {
+  // 优先使用 prompt，如果没有 prompt 则使用 queryText
+  const semanticQuery = request.prompt || request.queryText;
+  
+  if (semanticQuery) {
     // 使用向量相似度查询
-    const queryEmbedding = await generateEmbedding(request.queryText);
+    const queryEmbedding = await generateEmbedding(semanticQuery);
 
     const queryResponse = await index.query({
       vector: queryEmbedding,
@@ -145,7 +148,7 @@ export async function queryChunks(request: QueryChunksRequest): Promise<Chunk[]>
       score: match.score,
     }));
 
-    // 当有 queryText 时，也需要在客户端进行模糊过滤（因为 Pinecone filter 是精确匹配）
+    // 当有语义查询（prompt 或 queryText）时，也需要在客户端进行模糊过滤（因为 Pinecone filter 是精确匹配）
     if (request.module) {
       chunks = chunks.filter((chunk) => {
         const module = chunk.metadata.module || "";
@@ -322,6 +325,29 @@ export async function updateChunk(
     pageContent: finalPageContent,
     metadata: updatedMetadata,
   };
+}
+
+/**
+ * 删除 chunk
+ */
+export async function deleteChunk(chunkId: string): Promise<boolean> {
+  const index = getPineconeIndex();
+
+  try {
+    // 先验证 chunk 是否存在
+    const chunk = await getChunkById(chunkId);
+    if (!chunk) {
+      throw new Error(`Chunk with id ${chunkId} not found`);
+    }
+
+    // 使用 deleteOne 删除单个向量
+    await index.deleteOne(chunkId);
+
+    return true;
+  } catch (error: any) {
+    console.error("Error deleting chunk:", error);
+    throw new Error(`Failed to delete chunk: ${error.message}`);
+  }
 }
 
 /**

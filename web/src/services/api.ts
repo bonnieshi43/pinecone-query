@@ -4,6 +4,7 @@ import type {
   UpdateChunkRequest,
   UpdateChunkResponse,
   ChunkDetailResponse,
+  DeleteChunkResponse,
 } from "../types/chunk";
 
 const API_BASE = "/api";
@@ -51,6 +52,22 @@ export async function updateChunk(
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.error || "Failed to update chunk");
+  }
+
+  return await response.json();
+}
+
+export async function deleteChunk(chunkId: string): Promise<DeleteChunkResponse> {
+  const response = await fetch(`${API_BASE}/chunks/${chunkId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to delete chunk");
   }
 
   return await response.json();

@@ -25,6 +25,7 @@ export interface QueryChunksRequest {
   name?: string;
   path?: string;
   queryText?: string;
+  prompt?: string;
   metadataFilter?: boolean;
   topK?: number;
   page?: number;
@@ -54,6 +55,12 @@ export interface UpdateChunkResponse {
 export interface ChunkDetailResponse {
   success: boolean;
   chunk?: Chunk;
+  error?: string;
+}
+
+export interface DeleteChunkResponse {
+  success: boolean;
+  message?: string;
   error?: string;
 }
 

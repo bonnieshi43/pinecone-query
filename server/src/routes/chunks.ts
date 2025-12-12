@@ -3,12 +3,14 @@ import {
   queryChunks,
   getChunkById,
   updateChunk,
+  deleteChunk,
 } from "../services/pineconeService.js";
 import type {
   QueryChunksRequest,
   QueryChunksResponse,
   UpdateChunkRequest,
   UpdateChunkResponse,
+  DeleteChunkResponse,
 } from "../types/chunk.js";
 
 const router = express.Router();
@@ -19,11 +21,11 @@ router.post("/query", async (req: Request<{}, QueryChunksResponse, QueryChunksRe
     const request: QueryChunksRequest = req.body;
 
     // 验证至少有一个查询条件
-    if (!request.id && !request.module && !request.name && !request.path && !request.queryText) {
+    if (!request.id && !request.module && !request.name && !request.path && !request.queryText && !request.prompt) {
       return res.status(400).json({
         success: false,
         chunks: [],
-        error: "At least one query parameter (id, module, name, path, or queryText) is required",
+        error: "At least one query parameter (id, module, name, path, queryText, or prompt) is required",
       });
     }
 
@@ -98,6 +100,26 @@ router.put("/:chunkId", async (req: Request<{ chunkId: string }, UpdateChunkResp
     res.status(500).json({
       success: false,
       error: error.message || "Failed to update chunk",
+    });
+  }
+});
+
+// 删除 chunk
+router.delete("/:chunkId", async (req: Request<{ chunkId: string }>, res: Response<DeleteChunkResponse>) => {
+  try {
+    const { chunkId } = req.params;
+
+    await deleteChunk(chunkId);
+
+    res.json({
+      success: true,
+      message: `Chunk with id ${chunkId} deleted successfully`,
+    });
+  } catch (error: any) {
+    console.error("Error deleting chunk:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message || "Failed to delete chunk",
     });
   }
 });

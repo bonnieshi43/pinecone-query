@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import chunksRouter from "./routes/chunks.js";
 import statsRouter from "./routes/stats.js";
+import queryRouter from "./routes/query.js";
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 // Routes
 app.use("/api/chunks", chunksRouter);
 app.use("/api/stats", statsRouter);
+app.use("/api/query", queryRouter);
 
 // Health check endpoint
 app.get("/api/health", (req: Request, res: Response) => {

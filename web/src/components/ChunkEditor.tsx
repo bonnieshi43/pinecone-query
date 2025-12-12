@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
 import type { Chunk, ChunkMetadata } from "../types/chunk";
-import { updateChunk } from "../services/api";
+import { updateChunk, deleteChunk } from "../services/api";
 import "./ChunkEditor.scss";
 
 interface ChunkEditorProps {
   chunk: Chunk;
   onSave: (chunk: Chunk) => void;
+  onDelete?: (chunkId: string) => void;
   onCancel: () => void;
 }
 
-export const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunk, onSave, onCancel }) => {
+export const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunk, onSave, onDelete, onCancel }) => {
   const [pageContent, setPageContent] = useState(chunk.pageContent);
   const [metadata, setMetadata] = useState<ChunkMetadata>({ ...chunk.metadata });
   const [summary, setSummary] = useState(metadata.summary || "");
@@ -70,6 +71,33 @@ export const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunk, onSave, onCance
       }
     } catch (err: any) {
       setError(err.message || "An error occurred while updating the chunk");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!onDelete) return;
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete chunk "${chunk.id}"?\n\nThis action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await deleteChunk(chunk.id);
+
+      if (response.success) {
+        onDelete(chunk.id);
+      } else {
+        setError(response.error || "Failed to delete chunk");
+      }
+    } catch (err: any) {
+      setError(err.message || "An error occurred while deleting the chunk");
     } finally {
       setLoading(false);
     }
@@ -255,6 +283,11 @@ export const ChunkEditor: React.FC<ChunkEditorProps> = ({ chunk, onSave, onCance
         <button onClick={handleSave} disabled={loading} className="save-button">
           {loading ? "Saving..." : "Save Changes"}
         </button>
+        {onDelete && (
+          <button onClick={handleDelete} disabled={loading} className="delete-button">
+            {loading ? "Deleting..." : "Delete Chunk"}
+          </button>
+        )}
         <button onClick={onCancel} disabled={loading} className="cancel-button">
           Cancel
         </button>
