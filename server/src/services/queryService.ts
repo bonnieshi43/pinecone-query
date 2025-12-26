@@ -27,16 +27,30 @@ function getLLM(): ChatOpenAI {
 
   ensureProxy();
 
-  const apiKey = process.env.OPENAI_API_KEY;
+  // 支持使用中间商代理 API key
+  // 优先使用 OPENAI_API_KEY，如果没有则尝试使用代理 API key
+  const apiKey = process.env.OPENAI_API_KEY || process.env.LINGYA_API_KEY;
   if (!apiKey) {
-    throw new Error("OPENAI_API_KEY is not configured. Please set it in your .env file.");
+    throw new Error("API key is not configured. Please set OPENAI_API_KEY or LINGYA_API_KEY in your .env file.");
   }
 
-  cachedLLM = new ChatOpenAI({
+  // 构建配置对象
+  const config: any = {
     openAIApiKey: apiKey,
     modelName: process.env.OPENAI_MODEL || "gpt-3.5-turbo",
     temperature: 0.7,
-  });
+  };
+
+  // 如果设置了自定义 baseURL（中间商代理端点），则使用它
+  const baseURL = process.env.OPENAI_BASE_URL || process.env.LINGYA_BASE_URL;
+  if (baseURL) {
+    config.configuration = {
+      baseURL: baseURL,
+      apiKey: apiKey,
+    };
+  }
+
+  cachedLLM = new ChatOpenAI(config);
 
   return cachedLLM;
 }
